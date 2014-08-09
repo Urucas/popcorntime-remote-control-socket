@@ -5,7 +5,20 @@
  */
 
 try {
-	
+
+	var os=require('os');
+	var ifaces=os.networkInterfaces();
+	// local IP's logs
+	for (var dev in ifaces) {
+  	var alias=0;
+  	ifaces[dev].forEach(function(details){
+    	if(details.family=='IPv4') {
+				intra = details.address;
+  	  }
+	  });
+		console.log(dev+" "+intra);
+	}
+
 	var rcapp  = require('express')();
 	var rchttp = require('http').Server(rcapp);
 	
