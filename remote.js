@@ -41,13 +41,11 @@ try {
 		socket.emit("jalou", {name:localname});
 
 		socket.on("play", function(){
-			console.log("play");
-			try { videojs("video_player").play(); }catch(e) { alert(e); }
+			try { videojs("video_player").play(); }catch(e) { socket.emit("play error", {e:e}); }
 		});
 
 		socket.on("pause", function(){
-			console.log("pause");
-			try { videojs("video_player").pause(); }catch(e) { alert(e); }
+			try { videojs("video_player").pause(); }catch(e) { socket.emit("pause error", {e:e}); }
 		});
 	});
 	
