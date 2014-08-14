@@ -7,34 +7,39 @@
 try {
 
 	var os=require('os');
+	var localname = os.hostname();
+	console.log("local machine name: " +localname);
+
 	var ifaces=os.networkInterfaces();
 	// local IP's logs
 	for (var dev in ifaces) {
   	var alias=0;
   	ifaces[dev].forEach(function(details){
     	if(details.family=='IPv4') {
-				intra = details.address;
+				if(dev.match(/^en/)) {
+					intra = details.address;
+				}
   	  }
 	  });
-		console.log(dev+" "+intra);
 	}
-
 	var rcapp  = require('express')();
 	var rchttp = require('http').Server(rcapp);
 	
 	rcapp.get('', function(req, res){
 		res.writeHead(200, { 'Content-Type': 'text/html' });
-	  res.end("it works");
+	  res.end("It's popcorn time remote control");
 	});
 	
 	rcapp.get('/', function(req, res){
 		res.writeHead(200, { 'Content-Type': 'text/html' });
-	  res.end("it works");
+	  res.end("It's popcorn time remote control");
 	});
 
 	var io = require('socket.io')(rchttp);
 	io.on('connection', function(socket){
 		
+		socket.emit("jalou", {name:localname});
+
 		socket.on("play", function(){
 			console.log("play");
 			try { videojs("video_player").play(); }catch(e) { alert(e); }
@@ -47,7 +52,7 @@ try {
 	});
 	
 	rchttp.listen(8006, function(){
-		console.log("192.168.0.100:8006 server listening to socket.io");
+		console.log(intra +":8006 server listening to socket.io");
 	});
 	
 }catch(e){ 
