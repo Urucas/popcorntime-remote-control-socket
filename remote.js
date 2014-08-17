@@ -47,6 +47,23 @@ try {
 		socket.on("pause", function(){
 			try { videojs("video_player").pause(); }catch(e) { socket.emit("pause error", {e:e}); }
 		});
+
+		socket.on("volume up", function(){
+			try { 
+				var howLoudIsIt = videojs("video_player").volume(); 
+				howLoudIsIt  = howLoudIsIt + 0.1 > 1 ? 1 : howLoudIsIt + 0.1;
+				videojs("video_player").volume(howLoudIsIt);
+			} catch(e) { console.log(e); }
+		});
+
+		socket.on("volume down", function(){
+			try { 
+				var howLoudIsIt = videojs("video_player").volume(); 
+				howLoudIsIt  = howLoudIsIt - 0.1 < 0 ? 0 : howLoudIsIt - 0.1;
+				videojs("video_player").volume(howLoudIsIt);
+			} catch(e) { console.log(e); }
+		});
+
 	});
 	
 	rchttp.listen(8006, function(){
