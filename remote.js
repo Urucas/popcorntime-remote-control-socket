@@ -89,6 +89,14 @@ try {
 			}	
 		});
 
+		socket.on("mute", function(){
+			try {
+				videojs("video_player").muted( videojs("video_player").muted() ? false : true );
+			}catch(e){
+				console.log(e);
+			}
+		});
+
 		socket.on("get poster", function(){
 			try {
 				var thePoster = videojs("video_player").poster();
