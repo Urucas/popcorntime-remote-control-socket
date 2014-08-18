@@ -74,7 +74,9 @@ try {
 
 		this.mute = function() {
 			try {
-				videojs("video_player").muted( videojs("video_player").muted() ? false : true );
+				videojs("video_player").muted( 
+						videojs("video_player").muted() ? false : true 
+				);
 			}catch(e){
 				console.log(e);
 			}
@@ -82,13 +84,17 @@ try {
 
 		this.fullscreenToggle = function() {
 			try {
-				var vjs = videojs("video_player");
-				vjs.isFullscreen() ? vjs.exitFullscreen() : vjs.requestFullscreen();
-
+				var nativeWindow = require('nw.gui').Window.get();
+				if(nativeWindow.isFullscreen) {
+					nativeWindow.leaveFullscreen();
+					nativeWindow.focus();
+				}else{
+					nativeWindow.enterFullscreen();
+					nativeWindow.focus();
+				}
 			}catch(e){
-				console.log(e);
+				alert(e);
 			}
-
 		}
 	});
 
