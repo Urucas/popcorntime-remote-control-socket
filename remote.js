@@ -1,5 +1,5 @@
 /*
- * Remote controller uses socket.io to manage
+ * Popcorn Time Remote control uses socket.io to manage
  * communications between the mobile app and
  * the desktop popcorn-time app running
  */
@@ -11,7 +11,7 @@ try {
 	console.log("local machine name: " +localname);
 
 	var ifaces=os.networkInterfaces();
-	// local IP's logs
+
 	for (var dev in ifaces) {
 		var alias=0;
 		ifaces[dev].forEach(function(details){
@@ -27,9 +27,15 @@ try {
 	var rchttp = require('http').Server(rcapp);
 
 	var remotecontrol = new (function(){
-		
+	
+		this._movie = {};
+
+		this.setMovie = function(movie) {
+			this._movie = movie;
+		}
+
 		this.showPlayerButtons = function() {
-			io.sockets.emit("player created");
+			io.sockets.emit("player created", {movie: this._movie});
 		}
 
 		this.hidePlayerButtons = function() {
