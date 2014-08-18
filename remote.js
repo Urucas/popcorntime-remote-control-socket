@@ -22,8 +22,75 @@ try {
 			}
 		});
 	}
+
 	var rcapp  = require('express')();
 	var rchttp = require('http').Server(rcapp);
+
+	var remotecontrol = new (function(){
+		
+		this.showPlayerButtons = function() {
+			io.sockets.emit("player created");
+		}
+
+		this.hidePlayerButtons = function() {
+			io.sockets.emit("player close");
+		}
+
+		this.play = function() {
+			try { 
+				videojs("video_player").play(); 
+			}catch(e) { 
+				console.log(e);			
+			}
+		}
+
+		this.pause = function() {
+			try { 
+				videojs("video_player").pause();
+			}catch(e) { 
+				console.log(e);
+			}
+		}
+
+		this.volumeup = function() {
+			try { 
+				var howLoudIsIt = videojs("video_player").volume(); 
+				howLoudIsIt  = howLoudIsIt + 0.1 > 1 ? 1 : howLoudIsIt + 0.1;
+				videojs("video_player").volume(howLoudIsIt);
+			} catch(e) { 
+				console.log(e); 
+			}
+		}
+
+		this.volumedown = function() {
+			try { 
+				var howLoudIsIt = videojs("video_player").volume(); 
+				howLoudIsIt  = howLoudIsIt - 0.1 < 0 ? 0 : howLoudIsIt - 0.1;
+				videojs("video_player").volume(howLoudIsIt);
+			} catch(e) { 
+				console.log(e); 
+			}
+		}
+
+		this.mute = function() {
+			try {
+				videojs("video_player").muted( videojs("video_player").muted() ? false : true );
+			}catch(e){
+				console.log(e);
+			}
+		}
+
+		this.fullscreenToggle = function() {
+			try {
+				var vjs = videojs("video_player");
+				vjs.isFullscreen() ? vjs.exitFullscreen() : vjs.requestFullscreen();
+
+			}catch(e){
+				console.log(e);
+			}
+
+		}
+	});
 
 	rcapp.get('', function(req, res){
 		res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -41,68 +108,29 @@ try {
 		socket.emit("jalou", {name:localname});
 
 		socket.on("play", function(){
-			try { 
-				videojs("video_player").play(); 
-			}catch(e) { 
-				socket.emit("play error", {e:e}); 
-			}
+			remotecontrol.play();
 		});
 
 		socket.on("pause", function(){
-			try { 
-				videojs("video_player").pause();
-				var thePoster = videojs("video_player").poster();
-				console.log(thePoster); 
-
-			}catch(e) { 
-				console.log(e);
-				socket.emit("pause error", {e:e}); 
-			}
+			remotecontrol.pause();
 		});
 
 		socket.on("volume up", function(){
-			try { 
-				var howLoudIsIt = videojs("video_player").volume(); 
-				howLoudIsIt  = howLoudIsIt + 0.1 > 1 ? 1 : howLoudIsIt + 0.1;
-				videojs("video_player").volume(howLoudIsIt);
-			} catch(e) { console.log(e); }
+			remotecontrol.volumeup();
 		});
 
 		socket.on("volume down", function(){
-			try { 
-				var howLoudIsIt = videojs("video_player").volume(); 
-				howLoudIsIt  = howLoudIsIt - 0.1 < 0 ? 0 : howLoudIsIt - 0.1;
-				videojs("video_player").volume(howLoudIsIt);
-			} catch(e) { console.log(e); }
+			remotecontrol.volumedown();
 		});
 
 		socket.on("fullscreen", function(){
-			try {
-				var vjs = videojs("video_player");
-				if(vjs.isFullscreen()){ 
-					vjs.exitFullscreen();
-				}else{ 
-					vjs.requestFullscreen();
-				}
-			}catch(e){
-				console.log(e);
-			}	
+			remotecontrol.fullscreenToggle();
 		});
 
 		socket.on("mute", function(){
-			try {
-				videojs("video_player").muted( videojs("video_player").muted() ? false : true );
-			}catch(e){
-				console.log(e);
-			}
+			remotecontrol.mute();
 		});
-
-		socket.on("get poster", function(){
-			try {
-				var thePoster = videojs("video_player").poster();
-			}catch(e) { console.log(e); }		
-		});
-
+	
 	});
 
 	rchttp.listen(8006, function(){
