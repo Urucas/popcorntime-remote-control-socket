@@ -29,8 +29,10 @@ try {
 	var remotecontrol = new (function(){
 
 		this._movie = {};
+		this._uistate = "control";
 
 		this.showControl = function() {
+			this._uistate = "control";
 			io.sockets.emit("show control");
 		}
 
@@ -39,14 +41,17 @@ try {
 		}
 
 		this.showMovieDetail = function(){
+			this._uistate = "detail";
 			io.sockets.emit("show movie detail", this._movie);
 		}
 
 		this.showDownloading = function() {
+			this._uistate = "downloading";
 			io.sockets.emit("show downloading", this._movie);
 		}
 
 		this.showPlaying = function() {
+			this._uistate = "playing";
 			io.sockets.emit("show playing", this._movie);
 		}
 		
