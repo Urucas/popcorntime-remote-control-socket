@@ -27,35 +27,82 @@ try {
 	var rchttp = require('http').Server(rcapp);
 
 	var remotecontrol = new (function(){
-	
+
 		this._movie = {};
 
+		this.showControl = function() {
+			io.sockets.emit("show control");
+		}
+
 		this.setMovie = function(movie) {
-			this._movie = movie;
+			this._movie = movie;		
 		}
 
-		this.showPlayerButtons = function() {
-			io.sockets.emit("player created", {movie: this._movie});
+		this.showMovieDetail = function(){
+			io.sockets.emit("show movie detail", this._movie);
 		}
 
-		this.hidePlayerButtons = function() {
-			io.sockets.emit("player close");
+		this.showDownloading = function() {
+			io.sockets.emit("show downloading", this._movie);
+		}
+
+		this.showPlaying = function() {
+			io.sockets.emit("show playing", this._movie);
+		}
+		
+		this.startStreaming = function() {
+			$(".movie-btn.watch").trigger("click");
+		}
+
+		this.cancelStreaming = function() {
+			$(".loading-cancel").trigger("click");
+		}
+
+		this.triggerKeyPress = function(key) {
+			var el = document.getElementsByTagName("body");
+				  el = el[0];
+			if(document.createEventObject){
+				var eventObj = document.createEventObject();
+				eventObj.keyCode = key;
+				el.fireEvent("onkeydown", eventObj);   
+			} else if(document.createEvent)	{
+				var eventObj = document.createEvent("Events");
+				eventObj.initEvent("keydown", true, true);
+				eventObj.which = key;
+				el.dispatchEvent(eventObj);
+			} 
+		}
+
+		this.moveLeft = function() {
+			this.triggerKeyPress(37);
+		}
+
+		this.moveRight = function() {
+			this.triggerKeyPress(39);
+		}
+
+		this.moveUp = function() {
+			this.triggerKeyPress(38);
+		}
+
+		this.moveDown = function() {
+			this.triggerKeyPress(40);
+		}
+
+		this.enter = function() {
+			this.triggerKeyPress(13);
+		}
+
+		this.esc = function() {
+			this.triggerKeyPress(27);
 		}
 
 		this.play = function() {
-			try { 
-				videojs("video_player").play(); 
-			}catch(e) { 
-				console.log(e);			
-			}
+			try { videojs("video_player").play(); }catch(e) { console.log(e);	}
 		}
 
 		this.pause = function() {
-			try { 
-				videojs("video_player").pause();
-			}catch(e) { 
-				console.log(e);
-			}
+			try { videojs("video_player").pause(); }catch(e) { console.log(e); }
 		}
 
 		this.volumeup = function() {
@@ -79,13 +126,7 @@ try {
 		}
 
 		this.mute = function() {
-			try {
-				videojs("video_player").muted( 
-						videojs("video_player").muted() ? false : true 
-				);
-			}catch(e){
-				console.log(e);
-			}
+			try { videojs("video_player").muted( videojs("video_player").muted() ? false : true ); }catch(e){ console.log(e); }
 		}
 
 		this.fullscreenToggle = function() {
@@ -117,7 +158,39 @@ try {
 	var io = require('socket.io')(rchttp);
 	io.on('connection', function(socket){
 
-		socket.emit("jalou", {name:localname});
+		socket.emit("my name is", {name:localname});
+
+		socket.on("start streaming", function(){
+			remotecontrol.startStreaming();
+		});
+
+		socket.on("cancel streaming", function(){
+			remotecontrol.cancelStreaming();
+		});
+
+		socket.on("move left", function(){
+			remotecontrol.moveLeft();
+		});
+
+		socket.on("move up", function(){
+			remotecontrol.moveUp();
+		});
+
+		socket.on("move right", function(){
+			remotecontrol.moveRight();
+		});
+
+		socket.on("move down", function(){
+			remotecontrol.moveDown();
+		});
+
+		socket.on("press enter", function(){
+			remotecontrol.enter();
+		});
+
+		socket.on("press esc", function() {
+			remotecontrol.esc();
+		});
 
 		socket.on("play", function(){
 			remotecontrol.play();
@@ -142,7 +215,7 @@ try {
 		socket.on("mute", function(){
 			remotecontrol.mute();
 		});
-	
+
 	});
 
 	rchttp.listen(8006, function(){
