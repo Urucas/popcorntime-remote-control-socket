@@ -29,10 +29,10 @@ try {
 	var remotecontrol = new (function(){
 
 		this._movie = {};
-		this._uistate = "control";
+		this._view  = "control";
 
 		this.showControl = function() {
-			this._uistate = "control";
+			this._view = "control";
 			io.sockets.emit("show control");
 		}
 
@@ -40,18 +40,22 @@ try {
 			this._movie = movie;		
 		}
 
+		this.getView = function() {
+			return this._view;
+		}
+
 		this.showMovieDetail = function(){
-			this._uistate = "detail";
+			this._view = "detail";
 			io.sockets.emit("show movie detail", this._movie);
 		}
 
 		this.showDownloading = function() {
-			this._uistate = "downloading";
+			this._view = "downloading";
 			io.sockets.emit("show downloading", this._movie);
 		}
 
 		this.showPlaying = function() {
-			this._uistate = "playing";
+			this._view = "playing";
 			io.sockets.emit("show playing", this._movie);
 		}
 		
@@ -164,6 +168,12 @@ try {
 	io.on('connection', function(socket){
 
 		socket.emit("my name is", {name:localname});
+		switch(remotecontrol.getView()){
+			case "detail": remotecontrol.showMovieDetail(); break;
+		  case "downloading" : remotecontrol.showDownloading(); break;
+		  case "playing" : remotecontrol.showPlaying(); break;
+			default: remotecontrol.showControl(); break;
+		}
 
 		socket.on("start streaming", function(){
 			remotecontrol.startStreaming();
